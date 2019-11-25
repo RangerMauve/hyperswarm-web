@@ -1,0 +1,31 @@
+{
+  "name": "hyperswarm-web",
+  "version": "1.0.0",
+  "description": "Implementation of the hyperswarm API for use in web browsers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RangerMauve/hyperswarm-web.git"
+  },
+  "keywords": [
+    "hyperswarm",
+    "proxy",
+    "web",
+    "browser",
+    "webrtc"
+  ],
+  "author": "rangermauve",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RangerMauve/hyperswarm-web/issues"
+  },
+  "homepage": "https://github.com/RangerMauve/hyperswarm-web#readme",
+  "dependencies": {
+    "@geut/discovery-swarm-webrtc": "^2.2.4",
+    "duplexpair": "^1.0.1",
+    "hyperswarm-proxy-ws": "github:rangermauve/hyperswarm-proxy-ws#tests"
+  }
+}
