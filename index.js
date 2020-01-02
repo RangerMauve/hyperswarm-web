@@ -14,7 +14,7 @@ class HyperswarmWeb extends EventEmitter {
     super()
     const {
       maxPeers,
-      webrtcBoostrap,
+      webrtcBootstrap,
       wsProxy,
       simplePeer,
       wsReconnectDelay
@@ -23,7 +23,7 @@ class HyperswarmWeb extends EventEmitter {
     this.webrtcOpts = {
       maxPeers,
       simplePeer,
-      boostrap: webrtcBoostrap || DEFAULT_WEBRTC_BOOTSTRAP,
+      bootstrap: webrtcBootstrap || DEFAULT_WEBRTC_BOOTSTRAP,
       swarm: (info) => this._handleWebRTC(info)
     }
     this.wsOpts = {
@@ -38,31 +38,33 @@ class HyperswarmWeb extends EventEmitter {
       this.wsOpts.proxy = wsProxy
     }
 
-		this.isListening = false
-		this.destroyed = false
+    this.isListening = false
+    this.destroyed = false
   }
 
   _handleWS (connection, info) {
-    this.emot('connection', connection, info)
+    this.emit('connection', connection, info)
   }
 
   _handleWebRTC (info) {
     // Create a stream to split the connectivity
     const { socket1: emittedSocket, socket2: returnedSocket } = new DuplexPair()
 
+    // Emit one side of the stream as a connection
     this.emit('connection', emittedSocket, info)
 
     return returnedSocket
   }
 
   address () {
-    // What could possibly go here?!?!?!
+    // TODO: What could possibly go here?!?!?!
+    return { port: 0, family: 'IPv4', address: '127.0.0.1' }
   }
 
   listen (port, cb) {
-		if(this.isListening) return setTimeout(cb, 0)
+    if (this.isListening) return setTimeout(cb, 0)
 
-		this.isListening = true
+    this.isListening = true
 
     this.webrtc = webRTCSwarm(this.webrtcOpts)
     this.ws = new HyperswarmClient(this.wsOpts)
@@ -71,26 +73,39 @@ class HyperswarmWeb extends EventEmitter {
   }
 
   join (key, opts) {
-		this.listen()
+    this.listen()
+
+    this.webrtc.join(key)
+    this.ws.join(key, opts)
   }
 
   leave (key) {
-		this.listen()
+    this.listen()
 
+    this.webrtc.leave(key)
+    this.ws.leave(key)
   }
 
   connect (peer, cb) {
+    this.listen()
 
+    this.ws.connect(peer, cb)
   }
 
-  connectivity () {
-
+  connectivity (cb) {
+    this.listen(() => {
+      cb(null, {
+        bound: true,
+        bootstrapped: true,
+        holepunched: true
+      })
+    })
   }
 
   destroy (cb) {
-		this.destroyed = true
-		this.webrtc.destroy(() => {
-			this.ws.destroy(cb)
-		})
+    this.destroyed = true
+    this.webrtc.close(() => {
+      this.ws.destroy(cb)
+    })
   }
 }
