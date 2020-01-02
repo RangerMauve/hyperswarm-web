@@ -20,7 +20,7 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
     // Initialize client
     const hostname = `ws://localhost:${port}/`
     const client = hyperswarmweb({
-      wsProxy: hostname,
+      wsProxy: hostname
     })
 
     // Test connections in regular hyperswarm
@@ -38,7 +38,9 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
 
     // Test connections in proxied hyperswarm
     client.once('connection', (connection) => {
-      connection.on('error', () => void 0)
+      connection.on('error', () => {
+        // Whatever
+      })
 
       t.pass('Got proxied connection')
       connection.once('data', () => {
@@ -54,7 +56,9 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
 
       client.on('connection', (connection2) => {
         // Ignore other connections
-        connection2.on('error', () => void 0)
+        connection2.on('error', () => {
+          // Whatever
+        })
       })
     })
 
@@ -68,7 +72,6 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
 
     // Join channel on client
     client.join(key)
-
   } catch (e) {
     console.error(e)
     t.fail(e)
