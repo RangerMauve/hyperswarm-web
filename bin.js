@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const HyperswarmServer = require('hyperswarm-proxy-ws/server')
 const argv = require('minimist')(process.argv.slice(2))
 
