@@ -43,9 +43,38 @@ You could also compile an existing codebase relying on hyperswarm to run on the 
 ```
 npm i -g hyperswarm-web
 
-# Run it! Default port is 4977
+# Run it! Default port is 4977 (HYPR on a phone pad)
 hyperswarm-web
 
 # Run it with a custom port
 hyperswarm-web --port 42069
+```
+
+### Running as a Linux service with SystemD
+
+```bash
+sudo cat << EOF > /etc/systemd/system/hyperswarm-web.service
+[Unit]
+Description=Hyperswarm proxy server which webpages can connect to.
+
+[Service]
+Type=simple
+# Check that hyperswarm-web is present at this location
+# If it's not, replace the path with its location
+# You can get the location with 'whereis hyperswarm-web'
+# Optionally add a --port parameter if you don't want 4977
+ExecStart=/usr/local/bin/hyperswarm-web
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo chmod 644 /etc/systemd/system/hyperswarm-web.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable hyperswarm-web
+sudo systemctl start hyperswarm-web
+
+sudo systemctl status hyperswarm-web
 ```

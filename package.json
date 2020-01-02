@@ -30,7 +30,8 @@
     "@geut/discovery-swarm-webrtc": "^2.2.4",
     "duplexpair": "^1.0.1",
     "hyperswarm-proxy-ws": "^1.0.0",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.0",
+    "send": "^0.17.1"
   },
   "devDependencies": {
     "get-port": "^5.1.0",

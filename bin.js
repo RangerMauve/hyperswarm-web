@@ -1,13 +1,27 @@
 #!/usr/bin/env node
+
 const HyperswarmServer = require('hyperswarm-proxy-ws/server')
+const http = require('http')
+const send = require('send')
+const path = require('path')
+
 const argv = require('minimist')(process.argv.slice(2))
 
 const DEFAULT_PORT = 4977 // HYPR on a cellphone keypad
 
-const server = new HyperswarmServer()
+const INDEX_HTML_LOCATION = path.join(__dirname, 'index.html')
+
+const server = http.createServer(function onRequest (req, res) {
+  send(req, INDEX_HTML_LOCATION)
+    .pipe(res)
+})
+
+const wsServer = new HyperswarmServer()
+
+wsServer.listenOnServer(server)
 
 const port = argv.port ? parseInt(argv.port, 10) : DEFAULT_PORT
 
-server.listen(port, () => {
-  console.log('Listening to server')
-})
+console.log(`Listening on ws://localhost:${port}`)
+
+server.listen(port)
