@@ -4,6 +4,7 @@ const HyperswarmClient = require('hyperswarm-proxy-ws/client')
 const DuplexPair = require('duplexpair')
 
 const DEFAULT_WEBRTC_BOOTSTRAP = ['https://geut-webrtc-signal.herokuapp.com/']
+const DEFAULT_PROXY_SERVER = 'wss://hyperswarm.mauve.moe'
 
 module.exports = function swarm (opts) {
   return new HyperswarmWeb(opts)
@@ -27,15 +28,12 @@ class HyperswarmWeb extends EventEmitter {
       swarm: (info) => this._handleWebRTC(info)
     }
     this.wsOpts = {
-      maxPeers
+      maxPeers,
+      proxy: wsProxy || DEFAULT_PROXY_SERVER
     }
 
     if (wsReconnectDelay) {
       this.wsOpts.reconnectDelay = wsReconnectDelay
-    }
-
-    if (wsProxy) {
-      this.wsOpts.proxy = wsProxy
     }
 
     this.isListening = false

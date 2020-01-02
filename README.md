@@ -15,7 +15,8 @@ const hyperswarm = require('hyperswarm-web')
 const crypto = require('crypto')
 
 const swarm = hyperswarm({
-  // If you omit this, it'll try to connect to 'ws://localhost:4977'
+  // If you omit this, it'll try to connect to 'wss://hyperswarm.mauve.moe'
+  // It will also attempt to connect to a local proxy on `ws://localhost:4977`
   wsProxy: 'ws://yourproxy.com'
 })
 
