@@ -1,6 +1,6 @@
 {
   "name": "hyperswarm-web",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Implementation of the hyperswarm API for use in web browsers",
   "main": "index.js",
   "scripts": {
