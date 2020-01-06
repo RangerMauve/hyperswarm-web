@@ -44,9 +44,21 @@ class HyperswarmWeb extends EventEmitter {
     this.emit('connection', connection, info)
   }
 
-  _handleWebRTC (info) {
+  _handleWebRTC (discoveryInfo) {
     // Create a stream to split the connectivity
     const { socket1: emittedSocket, socket2: returnedSocket } = new DuplexPair()
+
+    const { id, channel, initiator } = discoveryInfo
+
+    const info = {
+      type: 'webrtc',
+      client: initiator,
+      peer: {
+        port: 0,
+        host: id,
+        topic: channel
+      }
+    }
 
     // Emit one side of the stream as a connection
     this.emit('connection', emittedSocket, info)
