@@ -112,6 +112,19 @@ class HyperswarmWeb extends EventEmitter {
     })
   }
 
+  // No clue how to implement this, it's undocumented
+  flush (cb) {
+    process.nextTick(cb)
+  }
+
+  // Always return that we're looking up and not announcing
+  status () {
+    return {
+      lookup: true,
+      announce: false
+    }
+  }
+
   destroy (cb) {
     this.destroyed = true
     this.webrtc.close(() => {
