@@ -17,7 +17,19 @@ const crypto = require('crypto')
 const swarm = hyperswarm({
   // If you omit this, it'll try to connect to 'wss://hyperswarm.mauve.moe'
   // It will also attempt to connect to a local proxy on `ws://localhost:4977`
-  wsProxy: 'ws://yourproxy.com'
+  wsProxy: 'ws://yourproxy.com',
+  // The configuration passed to the SimplePeer constructor
+  //See https://github.com/feross/simple-peer#peer--new-peeropts
+  // for more options
+  simplePeer:{
+    // The configuration passed to the RTCPeerConnection constructor,for more details see
+    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection#RTCConfiguration_dictionary
+    config:{
+      // List of STUN and TURN setvers to connect
+      // Without the connection is limited to local peers
+      iceServers:require("./ice-servers.json")
+    }
+  }
 })
 
 // look for peers listed under this topic
