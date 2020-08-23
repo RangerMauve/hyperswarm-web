@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const HyperswarmServer = require('hyperswarm-proxy-ws/server')
+const HyperswarmServer = require('./server')
+
 const http = require('http')
 const send = require('send')
 const path = require('path')

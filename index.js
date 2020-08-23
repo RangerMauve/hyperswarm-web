@@ -3,20 +3,36 @@ const webRTCSwarm = require('@geut/discovery-swarm-webrtc')
 const HyperswarmClient = require('hyperswarm-proxy-ws/client')
 const DuplexPair = require('duplexpair')
 
-const DEFAULT_WEBRTC_BOOTSTRAP = ['https://geut-webrtc-signal.herokuapp.com/']
+const DEFAULT_WEBRTC_BOOTSTRAP = ['wss://geut-webrtc-signal-v3.herokuapp.com', 'wss://geut-webrtc-signal-v3.glitch.me']
 const DEFAULT_PROXY_SERVER = 'wss://hyperswarm.mauve.moe'
 
 module.exports = function swarm (opts) {
   return new HyperswarmWeb(opts)
 }
 
+function getBootstrapUrls(path, defaultUrls = [], specificUrls = []) {
+  let urls = defaultUrls.map(url => {
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1)
+    }
+
+    return `${url}/${path}`
+  })
+
+  urls = urls.concat(specificUrls)
+
+  if (urls.length === 0) return
+  return urls
+}
+
 class HyperswarmWeb extends EventEmitter {
   constructor (opts = {}) {
     super()
     const {
-      maxPeers,
+      bootstrap,
       webrtcBootstrap,
       wsProxy,
+      maxPeers,
       simplePeer,
       wsReconnectDelay
     } = opts
@@ -24,12 +40,12 @@ class HyperswarmWeb extends EventEmitter {
     this.webrtcOpts = {
       maxPeers,
       simplePeer,
-      bootstrap: webrtcBootstrap || DEFAULT_WEBRTC_BOOTSTRAP,
+      bootstrap: getBootstrapUrls('signal', bootstrap, webrtcBootstrap) || DEFAULT_WEBRTC_BOOTSTRAP,
       swarm: (info) => this._handleWebRTC(info)
     }
     this.wsOpts = {
       maxPeers,
-      proxy: wsProxy || DEFAULT_PROXY_SERVER
+      proxy: getBootstrapUrls('proxy', bootstrap, wsProxy) || DEFAULT_PROXY_SERVER
     }
 
     if (wsReconnectDelay) {

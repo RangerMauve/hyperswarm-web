@@ -1,12 +1,12 @@
 const hyperswarm = require('hyperswarm')
-const HyperswarmServer = require('hyperswarm-proxy-ws/server')
+const HyperswarmServer = require('./server')
 const hyperswarmweb = require('./')
 const test = require('tape')
 const getPort = require('get-port')
 const crypto = require('crypto')
 
 test('Connect to local hyperswarm through local proxy', async (t) => {
-  t.plan(6)
+  t.plan(7)
   try {
     // Initialize local hyperswarm instance, listen for peers
     const swarm = hyperswarm()
@@ -18,9 +18,9 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
     server.listen(port)
 
     // Initialize client
-    const hostname = `ws://localhost:${port}/`
+    const hostname = `ws://localhost:${port}`
     const client = hyperswarmweb({
-      wsProxy: hostname
+      bootstrap: [hostname]
     })
 
     // Test connections in regular hyperswarm
@@ -72,6 +72,10 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
 
     // Join channel on client
     client.join(key)
+
+    client.webrtc.signal.once('connected', () => {
+      t.pass('should establish a websocket connection with the signal')
+    })
   } catch (e) {
     console.error(e)
     t.fail(e)

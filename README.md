@@ -15,9 +15,8 @@ const hyperswarm = require('hyperswarm-web')
 const crypto = require('crypto')
 
 const swarm = hyperswarm({
-  // If you omit this, it'll try to connect to 'wss://hyperswarm.mauve.moe'
-  // It will also attempt to connect to a local proxy on `ws://localhost:4977`
-  wsProxy: 'ws://yourproxy.com',
+  // Specify a server list of HyperswarmServer instances
+  bootstrap: ['ws://yourhyperswarmserver.com'],
   // The configuration passed to the SimplePeer constructor
   //See https://github.com/feross/simple-peer#peer--new-peeropts
   // for more options
