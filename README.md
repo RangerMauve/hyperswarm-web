@@ -17,6 +17,15 @@ const crypto = require('crypto')
 const swarm = hyperswarm({
   // Specify a server list of HyperswarmServer instances
   bootstrap: ['ws://yourhyperswarmserver.com'],
+  // You can also specify proxy and signal servers separated
+  wsProxy: [
+    'ws://proxy1.com',
+    'ws://proxy2.com'
+  ],
+  webrtcBootstrap: [
+    'ws://signal1.com',
+    'ws://signal2.com'
+  ],
   // The configuration passed to the SimplePeer constructor
   //See https://github.com/feross/simple-peer#peer--new-peeropts
   // for more options
@@ -51,6 +60,13 @@ Build it with [Browserify](http://browserify.org/) to get it running on the web.
 You could also compile an existing codebase relying on hyperswarm to run on the web by adding a `browser` field set to `{"hyperswarm": "hyperswarm-web"}` to have Browserify alias it when compiling dependencies.
 
 ## Setting up a proxy server
+
+`HyperswarmServer` provides two services:
+
+  - [HyperswarmProxyWS](https://github.com/RangerMauve/hyperswarm-proxy-ws): to proxy hyperswarm connections over websockets. Path: `ws://yourserver/proxy`
+  - [SignalServer](https://github.com/geut/discovery-swarm-webrtc#server): for P2P WebRTC signaling connections. Path: `ws://yourserver/signal`
+
+Running a `HyperswarmServer` will allows you to use both services in one single process.
 
 ```
 npm i -g hyperswarm-web

@@ -19,14 +19,13 @@ class HyperswarmServer extends HyperswarmProxyWSServer {
     server.on('upgrade', function upgrade(request, socket, head) {
       const pathname = url.parse(request.url).pathname;
 
-      if (pathname === '/proxy') {
-        proxyWss.handleUpgrade(request, socket, head, (ws) => proxyWss.emit('connection', ws, request));
-      } else if (pathname === '/signal') {
+      if (pathname === '/signal') {
         signalWss.handleUpgrade(request, socket, head, (ws) => signalWss.emit('connection', ws, request));
-      } else {
-        console.warn('Invalid path. The path must be "/proxy" or "/signal"')
-        socket.destroy();
+        return
       }
+
+      // proxy
+      proxyWss.handleUpgrade(request, socket, head, (ws) => proxyWss.emit('connection', ws, request));
     });
   }
 }
