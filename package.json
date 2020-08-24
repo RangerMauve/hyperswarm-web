@@ -27,11 +27,12 @@
   },
   "homepage": "https://github.com/RangerMauve/hyperswarm-web#readme",
   "dependencies": {
-    "@geut/discovery-swarm-webrtc": "^2.2.4",
+    "@geut/discovery-swarm-webrtc": "^4.0.0",
     "duplexpair": "^1.0.1",
-    "hyperswarm-proxy-ws": "^1.0.0",
+    "hyperswarm-proxy-ws": "^1.1.0",
     "minimist": "^1.2.0",
-    "send": "^0.17.1"
+    "send": "^0.17.1",
+    "websocket-stream": "^5.5.2"
   },
   "devDependencies": {
     "get-port": "^5.1.0",

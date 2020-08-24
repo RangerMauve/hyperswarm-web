@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const HyperswarmServer = require('hyperswarm-proxy-ws/server')
+const HyperswarmServer = require('./server')
+
 const http = require('http')
 const send = require('send')
 const path = require('path')
@@ -23,5 +24,7 @@ wsServer.listenOnServer(server)
 const port = argv.port ? parseInt(argv.port, 10) : DEFAULT_PORT
 
 console.log(`Listening on ws://localhost:${port}`)
+console.log(`-> Proxy available on ws://localhost:${port}/proxy`)
+console.log(`-> Signal available on ws://localhost:${port}/signal`)
 
 server.listen(port)
