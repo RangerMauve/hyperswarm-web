@@ -29,7 +29,7 @@
   "dependencies": {
     "@geut/discovery-swarm-webrtc": "^4.0.0",
     "duplexpair": "^1.0.1",
-    "hyperswarm-proxy-ws": "github:tinchoz49/hyperswarm-proxy-ws#tinchoz49/multiple-proxies",
+    "hyperswarm-proxy-ws": "^1.1.0",
     "minimist": "^1.2.0",
     "send": "^0.17.1",
     "websocket-stream": "^5.5.2"
