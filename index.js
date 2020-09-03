@@ -40,8 +40,7 @@ class HyperswarmWeb extends EventEmitter {
     this.webrtcOpts = {
       maxPeers,
       simplePeer,
-      bootstrap: getBootstrapUrls('signal', bootstrap, webrtcBootstrap) || DEFAULT_WEBRTC_BOOTSTRAP,
-      swarm: (info) => this._handleWebRTC(info)
+      bootstrap: getBootstrapUrls('signal', bootstrap, webrtcBootstrap) || DEFAULT_WEBRTC_BOOTSTRAP
     }
     this.wsOpts = {
       maxPeers,
@@ -60,13 +59,10 @@ class HyperswarmWeb extends EventEmitter {
     this.emit('connection', connection, info)
   }
 
-  _handleWebRTC (discoveryInfo) {
-    // Create a stream to split the connectivity
-    const { socket1: emittedSocket, socket2: returnedSocket } = new DuplexPair()
+  _handleWebRTC (connection, info) {
+    const { id, channel, initiator } = info
 
-    const { id, channel, initiator } = discoveryInfo
-
-    const info = {
+    const peerInfo = {
       type: 'webrtc',
       client: initiator,
       peer: {
@@ -76,10 +72,7 @@ class HyperswarmWeb extends EventEmitter {
       }
     }
 
-    // Emit one side of the stream as a connection
-    this.emit('connection', emittedSocket, info)
-
-    return returnedSocket
+    this.emit('connection', connection, peerInfo)
   }
 
   address () {
@@ -96,6 +89,7 @@ class HyperswarmWeb extends EventEmitter {
     this.ws = new HyperswarmClient(this.wsOpts)
 
     this.ws.on('connection', (connection, info) => this._handleWS(connection, info))
+    this.webrtc.on('connection', (connection, info) => this._handleWebRTC(connection, info))
   }
 
   join (key, opts) {

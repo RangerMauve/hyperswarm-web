@@ -4,18 +4,23 @@ const hyperswarmweb = require('./')
 const test = require('tape')
 const getPort = require('get-port')
 const crypto = require('crypto')
+const wrtc = require('wrtc')
+
+let server = null
+let port = null
+test('Setup', async function (t) {
+  // Initialize local proxy
+  server = new HyperswarmServer()
+  port = await getPort()
+  server.listen(port)
+  t.end()
+});
 
 test('Connect to local hyperswarm through local proxy', async (t) => {
-  t.plan(7)
+  t.plan(6)
   try {
     // Initialize local hyperswarm instance, listen for peers
     const swarm = hyperswarm()
-
-    // Initialize local proxy
-    const server = new HyperswarmServer()
-    const port = await getPort()
-
-    server.listen(port)
 
     // Initialize client
     const hostname = `ws://localhost:${port}`
@@ -48,7 +53,6 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
         connection.end(() => {
           t.pass('Proxied connection closed')
           client.destroy()
-          server.destroy()
         })
       })
 
@@ -72,12 +76,79 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
 
     // Join channel on client
     client.join(key)
+  } catch (e) {
+    console.error(e)
+    t.fail(e)
+  }
+})
 
-    client.webrtc.signal.once('connected', () => {
-      t.pass('should establish a websocket connection with the signal')
+test('Connect to webrtc peers', async (t) => {
+  t.plan(8)
+  try {
+    // Initialize client
+    const hostname = `ws://localhost:${port}`
+    const client1 = hyperswarmweb({
+      bootstrap: [hostname],
+      simplePeer: {
+        wrtc
+      }
+    })
+    const client2 = hyperswarmweb({
+      bootstrap: [hostname],
+      simplePeer: {
+        wrtc
+      }
+    })
+
+    client1.once('connection', (connection, info) => {
+      t.pass('Got connection from client2')
+      connection.once('end', () => {
+        t.pass('Connection client1 -> client2 ended')
+        client1.destroy()
+      })
+      connection.once('data', () => {
+        t.pass('The client1 got data')
+      })
+      connection.write('Hello World')
+    })
+
+    client2.once('connection', (connection) => {
+      connection.on('error', () => {
+        // Whatever
+      })
+
+      t.pass('Got connection from client1')
+      connection.once('data', () => {
+        t.pass('The client2 got data')
+        connection.end(() => {
+          t.pass('Connection client2 -> client1 ended')
+          client2.destroy()
+          server.destroy()
+        })
+      })
+
+      connection.write('Hello World')
+    })
+
+    const key = crypto.randomBytes(32)
+
+    // Join channel on client
+    client1.join(key);
+    client2.join(key);
+
+    client1.webrtc.signal.once('connected', () => {
+      t.pass('client1 should establish a websocket connection with the signal')
+    })
+    client2.webrtc.signal.once('connected', () => {
+      t.pass('client2 should establish a websocket connection with the signal')
     })
   } catch (e) {
     console.error(e)
     t.fail(e)
   }
 })
+
+test('Teardown', function (t) {
+  server.destroy()
+  t.end()
+});
