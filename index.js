@@ -3,7 +3,7 @@ const webRTCSwarm = require('@geut/discovery-swarm-webrtc')
 const HyperswarmClient = require('hyperswarm-proxy-ws/client')
 const DuplexPair = require('duplexpair')
 
-const DEFAULT_WEBRTC_BOOTSTRAP = ['wss://geut-webrtc-signal-v3.herokuapp.com', 'wss://geut-webrtc-signal-v3.glitch.me']
+const DEFAULT_WEBRTC_BOOTSTRAP = ['wss://geut-webrtc-signal-v3.herokuapp.com', 'wss://signal.dat-web.eu', 'wss://geut-webrtc-signal-v3.glitch.me']
 const DEFAULT_PROXY_SERVER = 'wss://hyperswarm.mauve.moe'
 
 module.exports = function swarm (opts) {
