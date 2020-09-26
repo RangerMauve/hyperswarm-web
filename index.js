@@ -69,7 +69,9 @@ class HyperswarmWeb extends EventEmitter {
         port: 0,
         host: id,
         topic: channel
-      }
+      },
+      // TODO: Add deduplication to WebRTC logic
+      deduplicate: () => false
     }
 
     this.emit('connection', connection, peerInfo)
