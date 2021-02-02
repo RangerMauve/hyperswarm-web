@@ -5,31 +5,67 @@ const test = require('tape')
 const getPort = require('get-port')
 const crypto = require('crypto')
 const wrtc = require('wrtc')
+const { inspect } = require('util')
 
 let server = null
 let port = null
 test('Setup', async function (t) {
   // Initialize local proxy
   server = new HyperswarmServer()
-  port = await getPort()
+  port = 4977 // await getPort() //
   server.listen(port)
   t.end()
-});
+})
 
-test('Connect to local hyperswarm through local proxy', async (t) => {
+test('Connect to local hyperswarm through local proxy', (t) => {
   t.plan(6)
   try {
     // Initialize local hyperswarm instance, listen for peers
-    const swarm = hyperswarm()
+    const swarm = hyperswarm({
+      announceLocalAddress: true
+      // ,
+      // bootstrap: `localhost:${BOOTSTRAP_PORT}`
+    })
 
     // Initialize client
     const hostname = `ws://localhost:${port}`
+
     const client = hyperswarmweb({
-      bootstrap: [hostname]
+      // bootstrap: [hostname]
+      announceLocalAddress: true,
+      wsProxy: [hostname]
     })
 
+    const key = crypto.randomBytes(32)
+
     // Test connections in regular hyperswarm
-    swarm.once('connection', (connection, info) => {
+    swarm.on('connection', function (connection, info) {
+      const {
+        priority,
+        status,
+        retries,
+        peer,
+        client
+      } = info
+      console.log('new swarm connection!', `
+        priority: ${priority}
+        status: ${status}
+        retries: ${retries}
+        client: ${client}
+        peer: ${!peer
+          ? peer
+          : `
+          ${inspect(peer, { indentationLvl: 4 }).slice(2, -2)}
+        `}
+      `)
+
+      // if (client) process.stdin.pipe(connection)
+      // else connection.pipe(process.stdout)
+
+      connection.on('error', (err) => {
+        // Whatever
+        console.log('swarm error', err)
+      })
       t.pass('Got connection locally')
       connection.once('end', () => {
         t.pass('Local connection ended')
@@ -41,10 +77,51 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
       connection.write('Hello World')
     })
 
+    swarm.connectivity((err, capabilities) => {
+      console.log('swarm network capabilities', capabilities, err || '')
+    })
+    swarm.on('peer', (peer) => {
+      console.log('new swarm peer!', `peer: ${!peer
+        ? peer
+        : `
+      ${inspect(peer, { indentationLvl: 4 }).slice(2, -2)}
+    `}
+  `)
+    })
+
+    // Join channel on local hyperswarm
+    swarm.join(key, {
+      announce: true,
+      lookup: true
+    }, function () {
+      console.log('fully joined...')
+      // Join channel on client
+      client.join(key)
+    })
+
     // Test connections in proxied hyperswarm
-    client.once('connection', (connection) => {
-      connection.on('error', () => {
+    client.once('connection', (connection, info) => {
+      const {
+        priority,
+        status,
+        retries,
+        peer,
+        client: clnt
+      } = info
+      console.log('new client connection!', `
+        priority: ${priority}
+        status: ${status}
+        retries: ${retries}
+        client: ${clnt}
+        peer: ${!peer
+          ? peer
+          : `
+          ${inspect(peer, { indentationLvl: 4 }).slice(2, -2)}
+        `}
+      `)
+      connection.on('error', (err) => {
         // Whatever
+        console.log('client error', err)
       })
 
       t.pass('Got proxied connection')
@@ -57,27 +134,13 @@ test('Connect to local hyperswarm through local proxy', async (t) => {
       })
 
       connection.write('Hello World')
-
-      client.on('connection', (connection2) => {
-        // Ignore other connections
-        connection2.on('error', () => {
-          // Whatever
-        })
-      })
     })
 
-    const key = crypto.randomBytes(32)
-
-    // Join channel on local hyperswarm
-    swarm.join(key, {
-      announce: true,
-      lookup: true
+    client.connectivity((err, capabilities) => {
+      console.log('client network capabilities', capabilities, err || '')
     })
-
-    // Join channel on client
-    client.join(key)
   } catch (e) {
-    console.error(e)
+    console.error('try failed: ', e)
     t.fail(e)
   }
 })
@@ -133,8 +196,8 @@ test('Connect to webrtc peers', async (t) => {
     const key = crypto.randomBytes(32)
 
     // Join channel on client
-    client1.join(key);
-    client2.join(key);
+    client1.join(key)
+    client2.join(key)
 
     client1.webrtc.signal.once('connected', () => {
       t.pass('client1 should establish a websocket connection with the signal')
@@ -151,4 +214,4 @@ test('Connect to webrtc peers', async (t) => {
 test('Teardown', function (t) {
   server.destroy()
   t.end()
-});
+})
