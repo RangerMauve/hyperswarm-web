@@ -113,6 +113,8 @@ test('Connect to local hyperswarm through local proxy', (t) => {
       `)
       connection.on('error', (err) => {
         // Whatever
+        console.error(err)
+        t.fail(err)
       })
 
       t.pass('Got proxied connection')
@@ -167,8 +169,10 @@ test('Connect to webrtc peers', async (t) => {
     })
 
     client2.once('connection', (connection) => {
-      connection.on('error', () => {
+      connection.on('error', (e) => {
         // Whatever
+        console.error(e)
+        t.fail(e)
       })
 
       t.pass('Got connection from client1')
