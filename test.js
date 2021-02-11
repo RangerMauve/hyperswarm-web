@@ -18,7 +18,7 @@ test('Setup', async function (t) {
 })
 
 test('Connect to local hyperswarm through local proxy', (t) => {
-  t.plan(6)
+  t.plan(9)
   try {
     // Initialize local hyperswarm instance, listen for peers
     const swarm = hyperswarm({
@@ -47,7 +47,7 @@ test('Connect to local hyperswarm through local proxy', (t) => {
         peer,
         client
       } = info
-      console.log('new swarm connection!', `
+      t.pass('new swarm connection!', `
         priority: ${priority}
         status: ${status}
         retries: ${retries}
@@ -59,13 +59,6 @@ test('Connect to local hyperswarm through local proxy', (t) => {
         `}
       `)
 
-      // if (client) process.stdin.pipe(connection)
-      // else connection.pipe(process.stdout)
-
-      connection.on('error', (err) => {
-        // Whatever
-        console.log('swarm error', err)
-      })
       t.pass('Got connection locally')
       connection.once('end', () => {
         t.pass('Local connection ended')
@@ -78,10 +71,10 @@ test('Connect to local hyperswarm through local proxy', (t) => {
     })
 
     swarm.connectivity((err, capabilities) => {
-      console.log('swarm network capabilities', capabilities, err || '')
+      t.pass('swarm network capabilities', capabilities, err || '')
     })
     swarm.on('peer', (peer) => {
-      console.log('new swarm peer!', `peer: ${!peer
+      t.pass('new swarm peer!', `peer: ${!peer
         ? peer
         : `
       ${inspect(peer, { indentationLvl: 4 }).slice(2, -2)}
@@ -94,7 +87,6 @@ test('Connect to local hyperswarm through local proxy', (t) => {
       announce: true,
       lookup: true
     }, function () {
-      console.log('fully joined...')
       // Join channel on client
       client.join(key)
     })
@@ -108,7 +100,7 @@ test('Connect to local hyperswarm through local proxy', (t) => {
         peer,
         client: clnt
       } = info
-      console.log('new client connection!', `
+      t.pass('new client connection!', `
         priority: ${priority}
         status: ${status}
         retries: ${retries}
@@ -121,7 +113,6 @@ test('Connect to local hyperswarm through local proxy', (t) => {
       `)
       connection.on('error', (err) => {
         // Whatever
-        console.log('client error', err)
       })
 
       t.pass('Got proxied connection')
@@ -137,7 +128,7 @@ test('Connect to local hyperswarm through local proxy', (t) => {
     })
 
     client.connectivity((err, capabilities) => {
-      console.log('client network capabilities', capabilities, err || '')
+      t.pass('client network capabilities', capabilities, err || '')
     })
   } catch (e) {
     console.error('try failed: ', e)
