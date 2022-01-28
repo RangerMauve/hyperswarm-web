@@ -37,7 +37,9 @@ const swarm = hyperswarm({
       // Without the connection is limited to local peers
       iceServers: require('./ice-servers.json')
     }
-  }
+  },
+  // Maximum number of peers. Used in both webrtc (default 5) and ws proxy config (default 24).
+  maxPeers: 10
 })
 
 // look for peers listed under this topic
