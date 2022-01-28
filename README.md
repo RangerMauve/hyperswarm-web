@@ -38,8 +38,11 @@ const swarm = hyperswarm({
       iceServers: require('./ice-servers.json')
     }
   },
-  // Maximum number of peers. Used in both webrtc (default 5) and ws proxy config (default 24).
-  maxPeers: 10
+  // Maximum number of peers (optional)
+  // Used in both webrtc (default 5) and ws proxy config (default 24)
+  maxPeers: 10,
+  // Websocket reconnect delay in milliseconds (optional) (default 1000)
+  wsReconnectDelay: 5000
 })
 
 // look for peers listed under this topic
