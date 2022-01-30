@@ -27,17 +27,22 @@ const swarm = hyperswarm({
     'ws://signal2.com'
   ],
   // The configuration passed to the SimplePeer constructor
-  //See https://github.com/feross/simple-peer#peer--new-peeropts
+  // See https://github.com/feross/simple-peer#peer--new-peeropts
   // for more options
-  simplePeer:{
-    // The configuration passed to the RTCPeerConnection constructor,for more details see
+  simplePeer: {
+    // The configuration passed to the RTCPeerConnection constructor, for more details see
     // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection#RTCConfiguration_dictionary
-    config:{
-      // List of STUN and TURN setvers to connect
+    config: {
+      // List of STUN and TURN servers to connect
       // Without the connection is limited to local peers
-      iceServers:require("./ice-servers.json")
+      iceServers: require('./ice-servers.json')
     }
-  }
+  },
+  // Maximum number of peers (optional)
+  // Used in both webrtc (default 5) and ws proxy config (default 24)
+  maxPeers: 10,
+  // Websocket reconnect delay in milliseconds (optional) (default 1000)
+  wsReconnectDelay: 5000
 })
 
 // look for peers listed under this topic
