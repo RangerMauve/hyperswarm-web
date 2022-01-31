@@ -25,6 +25,21 @@ function getBootstrapUrls(path, defaultUrls = [], specificUrls = []) {
   return urls
 }
 
+function webrtcPeerInfo (info) {
+  const { id, channel, initiator } = info
+  return {
+    type: 'webrtc',
+    client: initiator,
+    peer: {
+      port: 0,
+      host: id,
+      topic: channel
+    },
+    // TODO: Add deduplication to WebRTC logic
+    deduplicate: () => false
+  }
+}
+
 class HyperswarmWeb extends EventEmitter {
   constructor (opts = {}) {
     super()
@@ -55,26 +70,8 @@ class HyperswarmWeb extends EventEmitter {
     this.destroyed = false
   }
 
-  _handleWS (connection, info) {
+  _handleConnection (connection, info) {
     this.emit('connection', connection, info)
-  }
-
-  _handleWebRTC (connection, info) {
-    const { id, channel, initiator } = info
-
-    const peerInfo = {
-      type: 'webrtc',
-      client: initiator,
-      peer: {
-        port: 0,
-        host: id,
-        topic: channel
-      },
-      // TODO: Add deduplication to WebRTC logic
-      deduplicate: () => false
-    }
-
-    this.emit('connection', connection, peerInfo)
   }
 
   address () {
@@ -88,10 +85,10 @@ class HyperswarmWeb extends EventEmitter {
     this.isListening = true
 
     this.webrtc = webRTCSwarm(this.webrtcOpts)
-    this.ws = new HyperswarmClient(this.wsOpts)
+    this.webrtc.on('connection', (connection, info) => this._handleConnection(connection, webrtcPeerInfo(info)))
 
-    this.ws.on('connection', (connection, info) => this._handleWS(connection, info))
-    this.webrtc.on('connection', (connection, info) => this._handleWebRTC(connection, info))
+    this.ws = new HyperswarmClient(this.wsOpts)
+    this.ws.on('connection', (connection, info) => this._handleConnection(connection, info))
   }
 
   join (key, opts) {
