@@ -61,6 +61,7 @@ swarm.on('connection', (socket, details) => {
 
 swarm.on('disconnection', (socket, details) => {
   console.log(details.peer.host, 'disconnected!')
+  console.log('now we have', swarm.peers.length, 'peers!')
 })
 ```
 
