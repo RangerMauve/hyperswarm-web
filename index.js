@@ -74,6 +74,10 @@ class HyperswarmWeb extends EventEmitter {
     this.emit('connection', connection, info)
   }
 
+  _handleDisconnection (connection, info) {
+    this.emit('disconnection', connection, info)
+  }
+
   address () {
     // TODO: What could possibly go here?!?!?!
     return { port: 0, family: 'IPv4', address: '127.0.0.1' }
@@ -86,9 +90,11 @@ class HyperswarmWeb extends EventEmitter {
 
     this.webrtc = webRTCSwarm(this.webrtcOpts)
     this.webrtc.on('connection', (connection, info) => this._handleConnection(connection, webrtcPeerInfo(info)))
+    this.webrtc.on('connection-closed', (connection, info) => this._handleDisconnection(connection, webrtcPeerInfo(info)))
 
     this.ws = new HyperswarmClient(this.wsOpts)
     this.ws.on('connection', (connection, info) => this._handleConnection(connection, info))
+    this.ws.on('disconnection', (connection, info) => this._handleDisconnection(connection, info))
   }
 
   join (key, opts) {
