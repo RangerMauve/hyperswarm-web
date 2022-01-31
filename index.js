@@ -68,14 +68,21 @@ class HyperswarmWeb extends EventEmitter {
 
     this.isListening = false
     this.destroyed = false
+    this._peers = new Map()
   }
 
   _handleConnection (connection, info) {
+    this._peers.set(info.peer.host, { connection, info })
     this.emit('connection', connection, info)
   }
 
   _handleDisconnection (connection, info) {
+    this._peers.delete(info.peer.host)
     this.emit('disconnection', connection, info)
+  }
+
+  get peers () {
+    return Array.from(this._peers.values())
   }
 
   address () {
