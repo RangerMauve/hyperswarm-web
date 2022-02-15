@@ -58,6 +58,11 @@ swarm.on('connection', (socket, details) => {
   // you can now use the socket as a stream, eg:
   // socket.pipe(hypercore.replicate()).pipe(socket)
 })
+
+swarm.on('disconnection', (socket, details) => {
+  console.log(details.peer.host, 'disconnected!')
+  console.log('now we have', swarm.peers.length, 'peers!')
+})
 ```
 
 Build it with [Browserify](http://browserify.org/) to get it running on the web.

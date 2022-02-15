@@ -25,6 +25,21 @@ function getBootstrapUrls(path, defaultUrls = [], specificUrls = []) {
   return urls
 }
 
+function webrtcPeerInfo (info) {
+  const { id, channel, initiator } = info
+  return {
+    type: 'webrtc',
+    client: initiator,
+    peer: {
+      port: 0,
+      host: id,
+      topic: channel
+    },
+    // TODO: Add deduplication to WebRTC logic
+    deduplicate: () => false
+  }
+}
+
 class HyperswarmWeb extends EventEmitter {
   constructor (opts = {}) {
     super()
@@ -53,28 +68,21 @@ class HyperswarmWeb extends EventEmitter {
 
     this.isListening = false
     this.destroyed = false
+    this._peers = new Map()
   }
 
-  _handleWS (connection, info) {
+  _handleConnection (connection, info) {
+    this._peers.set(info.peer.host, { connection, info })
     this.emit('connection', connection, info)
   }
 
-  _handleWebRTC (connection, info) {
-    const { id, channel, initiator } = info
+  _handleDisconnection (connection, info) {
+    this._peers.delete(info.peer.host)
+    this.emit('disconnection', connection, info)
+  }
 
-    const peerInfo = {
-      type: 'webrtc',
-      client: initiator,
-      peer: {
-        port: 0,
-        host: id,
-        topic: channel
-      },
-      // TODO: Add deduplication to WebRTC logic
-      deduplicate: () => false
-    }
-
-    this.emit('connection', connection, peerInfo)
+  get peers () {
+    return Array.from(this._peers.values())
   }
 
   address () {
@@ -88,10 +96,12 @@ class HyperswarmWeb extends EventEmitter {
     this.isListening = true
 
     this.webrtc = webRTCSwarm(this.webrtcOpts)
-    this.ws = new HyperswarmClient(this.wsOpts)
+    this.webrtc.on('connection', (connection, info) => this._handleConnection(connection, webrtcPeerInfo(info)))
+    this.webrtc.on('connection-closed', (connection, info) => this._handleDisconnection(connection, webrtcPeerInfo(info)))
 
-    this.ws.on('connection', (connection, info) => this._handleWS(connection, info))
-    this.webrtc.on('connection', (connection, info) => this._handleWebRTC(connection, info))
+    this.ws = new HyperswarmClient(this.wsOpts)
+    this.ws.on('connection', (connection, info) => this._handleConnection(connection, info))
+    this.ws.on('disconnection', (connection, info) => this._handleDisconnection(connection, info))
   }
 
   join (key, opts) {
